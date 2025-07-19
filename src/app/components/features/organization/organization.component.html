@@ -2,7 +2,13 @@
   <div class="header">
     <h2>Organización</h2>
     <div class="header-actions">
-      <button nz-button nzType="primary">
+      <button
+        nz-button
+        nzType="primary"
+        (click)="showCreateModal()"
+        nz-tooltip
+        nzTooltipTitle="Crear división"
+      >
         <span nz-icon nzType="plus" nzTheme="outline"></span>
       </button>
 
@@ -135,3 +141,71 @@
     >
   </div>
 </div>
+
+<nz-modal
+  [(nzVisible)]="isCreateModalVisible"
+  nzTitle="Crear División"
+  nzWidth="600px"
+  [nzOkText]="'Crear'"
+  [nzCancelText]="'Cancelar'"
+  [nzOkLoading]="isSubmitting"
+  [nzOkDisabled]="createDivisionForm.invalid"
+  (nzOnCancel)="handleCreateCancel()"
+  (nzOnOk)="handleCreateOk()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="createDivisionForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="nombre"
+          >Nombre de la División</nz-form-label
+        >
+        <nz-form-control [nzErrorTip]="getFieldError('nombre')">
+          <input
+            nz-input
+            formControlName="nombre"
+            id="nombre"
+            placeholder="Ingrese el nombre de la división"
+            [nzStatus]="isFieldError('nombre') ? 'error' : ''"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="divisionSuperiorId"
+          >División Superior</nz-form-label
+        >
+        <nz-form-control nzErrorTip="Seleccione una división superior">
+          <nz-select
+            formControlName="divisionSuperiorId"
+            id="divisionSuperiorId"
+            nzPlaceHolder="Seleccione división superior (opcional)"
+            nzAllowClear
+            nzShowSearch
+            [nzStatus]="isFieldError('divisionSuperiorId') ? 'error' : ''"
+          >
+            <nz-option
+              *ngFor="let division of availableParentDivisions"
+              [nzValue]="division.id"
+              [nzLabel]="division.nombre"
+            >
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="embajadorNombre">Embajador</nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            formControlName="embajadorNombre"
+            id="embajadorNombre"
+            nzPlaceHolder="Seleccione un embajador (opcional)"
+            rows="1"
+          >
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

@@ -1,8 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { DvisionViewModel } from '../../entities/divisions.entity';
+import { CreateDivision, DvisionViewModel } from '../../entities/divisions.entity';
 import { DivisionService } from '../../services/division.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -14,6 +20,9 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 interface ColumnFilter {
   text: string;
@@ -26,6 +35,7 @@ interface ColumnFilter {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     NzTabsModule,
     NzTableModule,
     NzButtonModule,
@@ -37,6 +47,8 @@ interface ColumnFilter {
     NzMenuModule,
     NzTagModule,
     NzToolTipModule,
+    NzModalModule,
+    NzFormModule,
   ],
   templateUrl: './organization.component.html',
   styleUrl: './organization.component.scss',
@@ -50,7 +62,24 @@ export class OrganizationComponent implements OnInit {
   divisionFilters: ColumnFilter[] = [];
   divisionSuperiorFilters: ColumnFilter[] = [];
 
-  constructor(private divisionService: DivisionService) {}
+  // Modal properties
+  isCreateModalVisible = false;
+  createDivisionForm: FormGroup;
+  isSubmitting = false;
+
+  constructor(
+    private divisionService: DivisionService,
+    private fb: FormBuilder,
+    private message: NzMessageService,
+    private modal: NzModalService
+  ) {
+    this.createDivisionForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      divisionSuperiorId: [null],
+      embajadorNombre: [null],
+      descripcion: [''],
+    });
+  }
 
   async ngOnInit() {
     try {
@@ -66,6 +95,12 @@ export class OrganizationComponent implements OnInit {
     return this.divisions.reduce(
       (total, division) => total + division.cantidadColaboradores,
       0
+    );
+  }
+
+  get availableParentDivisions(): DvisionViewModel[] {
+    return this.divisions.filter(
+      (division) => division.id !== this.createDivisionForm.get('id')?.value
     );
   }
 
@@ -93,14 +128,12 @@ export class OrganizationComponent implements OnInit {
   }
 
   setupFilters() {
-    // Setup division filters
     const uniqueDivisions = [...new Set(this.divisions.map((d) => d.nombre))];
     this.divisionFilters = uniqueDivisions.map((name) => ({
       text: name,
       value: name,
     }));
 
-    // Setup division superior filters
     const uniqueDivisionSuperior = [
       ...new Set(
         this.divisions
@@ -134,6 +167,68 @@ export class OrganizationComponent implements OnInit {
           selectedValues.includes(division.divisionSuperiorNombre)
       );
     }
+  }
+
+  showCreateModal() {
+    this.isCreateModalVisible = true;
+    this.createDivisionForm.reset();
+  }
+
+  handleCreateCancel() {
+    this.isCreateModalVisible = false;
+    this.createDivisionForm.reset();
+  }
+
+  async handleCreateOk() {
+    if (this.createDivisionForm.valid) {
+      try {
+        this.isSubmitting = true;
+        const formValue: CreateDivision = this.createDivisionForm.value;
+
+        const newDivision = await this.divisionService.createDivision(
+          formValue
+        );
+
+        this.divisions.push(newDivision);
+        this.filteredDivisions = [...this.divisions];
+
+        this.setupFilters();
+
+        this.isCreateModalVisible = false;
+        this.createDivisionForm.reset();
+        this.message.success('División creada exitosamente');
+      } catch (error) {
+        console.error('Error creating division:', error);
+        this.message.error('Error al crear la división');
+      } finally {
+        this.isSubmitting = false;
+      }
+    } else {
+      Object.values(this.createDivisionForm.controls).forEach((control) => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+    }
+  }
+
+  isFieldError(fieldName: string): boolean {
+    const field = this.createDivisionForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.createDivisionForm.get(fieldName);
+    if (field && field.errors) {
+      if (field.errors['required']) {
+        return `${fieldName} es requerido`;
+      }
+      if (field.errors['minlength']) {
+        return `${fieldName} debe tener al menos ${field.errors['minlength'].requiredLength} caracteres`;
+      }
+    }
+    return '';
   }
 
   // Sort functions

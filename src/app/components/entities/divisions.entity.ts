@@ -8,3 +8,9 @@ export interface DvisionViewModel {
   divisionSuperiorNombre?: string | null;
   cantidadSubdivisiones?: number;
 }
+
+export interface CreateDivision {
+  nombre: string,
+  divisionSuperiorNombre?: string,
+  embajadorNombre?: string,
+}
