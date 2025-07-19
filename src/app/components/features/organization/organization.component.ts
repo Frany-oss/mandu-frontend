@@ -169,13 +169,8 @@ export class OrganizationComponent implements OnInit {
     }
   }
 
-  showCreateModal() {
-    this.isCreateModalVisible = true;
-    this.createDivisionForm.reset();
-  }
-
-  handleCreateCancel() {
-    this.isCreateModalVisible = false;
+  handleModal() {
+    this.isCreateModalVisible = !this.isCreateModalVisible;
     this.createDivisionForm.reset();
   }
 

@@ -5,7 +5,7 @@
       <button
         nz-button
         nzType="primary"
-        (click)="showCreateModal()"
+        (click)="handleModal()"
         nz-tooltip
         nzTooltipTitle="Crear división"
       >
@@ -150,7 +150,7 @@
   [nzCancelText]="'Cancelar'"
   [nzOkLoading]="isSubmitting"
   [nzOkDisabled]="createDivisionForm.invalid"
-  (nzOnCancel)="handleCreateCancel()"
+  (nzOnCancel)="handleModal()"
   (nzOnOk)="handleCreateOk()"
 >
   <ng-container *nzModalContent>
