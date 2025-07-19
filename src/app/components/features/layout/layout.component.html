@@ -1,0 +1,45 @@
+<div class="banner">
+  <div class="nav-left">
+    <div class="logo">mandü</div>
+    <nav class="nav-menu">
+      <a href="#" class="nav-item">Dashboard</a>
+      <a routerLink="/organization" class="nav-item" routerLinkActive="active">
+        Organización
+      </a>
+      <a href="#" class="nav-item">
+        Modelos
+        <i class="fas fa-chevron-down"></i>
+      </a>
+      <a href="#" class="nav-item">
+        Seguimiento
+        <i class="fas fa-chevron-down"></i>
+      </a>
+    </nav>
+  </div>
+
+  <div class="nav-right">
+    <button class="icon-button">
+      <i class="fas fa-home"></i>
+    </button>
+    <button class="icon-button">
+      <i class="fas fa-question-circle"></i>
+    </button>
+    <button class="icon-button">
+      <i class="fas fa-bell"></i>
+      <span class="notification-badge">1</span>
+    </button>
+
+    <div class="user-menu">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <span class="user-name">Administrador</span>
+        <i class="fas fa-chevron-down dropdown-icon"></i>
+      </div>
+    </div>
+
+    <div class="mandii-logo">mandü</div>
+  </div>
+</div>
+<div class="main-content">
+  <router-outlet></router-outlet>
+</div>

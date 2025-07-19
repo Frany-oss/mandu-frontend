@@ -1,0 +1,137 @@
+<div class="organization-container">
+  <div class="header">
+    <h2>Organización</h2>
+    <div class="header-actions">
+      <button nz-button nzType="primary">
+        <span nz-icon nzType="plus" nzTheme="outline"></span>
+      </button>
+
+      <button nz-button nzType="default">
+        <span nz-icon nzType="upload" nzTheme="outline"></span>
+      </button>
+      <button nz-button nzType="default">
+        <span nz-icon nzType="download" nzTheme="outline"></span>
+      </button>
+    </div>
+  </div>
+
+  <nz-tabset [nzSelectedIndex]="0" class="organization-tabs">
+    <nz-tab nzTitle="Divisiones">
+      <div class="table-controls" style="margin-top: 2rem">
+        <div class="view-controls">
+          <nz-radio-group [(ngModel)]="viewMode">
+            <label nz-radio-button nzValue="list">Listado</label>
+            <label nz-radio-button nzValue="tree">Árbol</label>
+          </nz-radio-group>
+        </div>
+
+        <div class="search-controls">
+          <nz-select
+            nzShowSearch
+            nzPlaceHolder="Columnas"
+            class="column-select"
+            [(ngModel)]="selectedColumns"
+            nzMode="multiple"
+          >
+            <nz-option nzValue="division" nzLabel="División"></nz-option>
+            <nz-option
+              nzValue="divisionSuperior"
+              nzLabel="División superior"
+            ></nz-option>
+            <nz-option
+              nzValue="colaboradores"
+              nzLabel="Colaboradores"
+            ></nz-option>
+            <nz-option nzValue="nivel" nzLabel="Nivel"></nz-option>
+            <nz-option
+              nzValue="subdivisiones"
+              nzLabel="Subdivisiones"
+            ></nz-option>
+            <nz-option nzValue="embajadores" nzLabel="Embajadores"></nz-option>
+          </nz-select>
+
+          <nz-input-group nzSearch nzEnterButton class="search-input">
+            <input
+              type="text"
+              nz-input
+              placeholder="Buscar"
+              [(ngModel)]="searchValue"
+              (ngModelChange)="onSearch()"
+            />
+          </nz-input-group>
+        </div>
+      </div>
+
+      <nz-table
+        #divisionsTable
+        [nzData]="filteredDivisions"
+        [nzFrontPagination]="true"
+        [nzPageSize]="10"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 20, 50, 100]"
+        nzSize="small"
+        class="divisions-table"
+      >
+        <thead>
+          <tr>
+            <th
+              nzColumnKey="division"
+              [nzSortFn]="sortByDivision"
+              [nzFilters]="divisionFilters"
+              (nzFilterChange)="onDivisionFilterChange($event)"
+            >
+              División
+              <span nz-icon nzType="filter" nzTheme="fill"></span>
+            </th>
+            <th
+              nzColumnKey="divisionSuperior"
+              [nzSortFn]="sortByDivisionSuperior"
+              [nzFilters]="divisionSuperiorFilters"
+              (nzFilterChange)="onDivisionSuperiorFilterChange($event)"
+            >
+              División superior
+              <span nz-icon nzType="filter" nzTheme="fill"></span>
+            </th>
+            <th nzColumnKey="colaboradores" [nzSortFn]="sortByColaboradores">
+              Colaboradores
+            </th>
+            <th nzColumnKey="nivel" [nzSortFn]="sortByNivel">Nivel</th>
+            <th nzColumnKey="subdivisiones" [nzSortFn]="sortBySubdivisiones">
+              Subdivisiones
+            </th>
+            <th nzColumnKey="embajadores">Embajadores</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let division of divisionsTable.data">
+            <td>{{ division.nombre }}</td>
+            <td>{{ division.divisionSuperiorNombre || "-" }}</td>
+            <td>{{ division.cantidadColaboradores }}</td>
+            <td>{{ division.nivel }}</td>
+            <td>
+              <span
+                class="subdivision-count"
+                *ngIf="division.cantidadSubdivisiones"
+              >
+                {{ division.cantidadSubdivisiones }}
+                <nz-tag nzColor="green" class="subdivision-tag">
+                  <span nz-icon nzType="plus"></span>
+                </nz-tag>
+              </span>
+              <span *ngIf="!division.cantidadSubdivisiones">-</span>
+            </td>
+            <td>{{ division.embajadorNombre || "-" }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-tab>
+    <nz-tab nzTitle="Colaboradores"></nz-tab>
+  </nz-tabset>
+
+  <div class="table-footer">
+    <span class="total-count"
+      >Total colaboradores: {{ totalColaboradores }}</span
+    >
+  </div>
+</div>
