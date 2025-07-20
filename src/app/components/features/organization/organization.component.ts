@@ -27,13 +27,6 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-// Agregar la interfaz CreateSubdivision
-export interface CreateSubdivision {
-  nombre: string;
-  divisionId?: number;
-  embajadorNombre?: string;
-}
-
 interface ColumnFilter {
   text: string;
   value: string;
@@ -86,8 +79,7 @@ export class OrganizationComponent implements OnInit {
   constructor(
     private divisionService: DivisionService,
     private fb: FormBuilder,
-    private message: NzMessageService,
-    private modal: NzModalService
+    private message: NzMessageService
   ) {
     this.createDivisionForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
