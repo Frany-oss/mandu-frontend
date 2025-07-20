@@ -1,4 +1,8 @@
-import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideZoneChangeDetection,
+  importProvidersFrom,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -9,12 +13,13 @@ import { FormsModule } from '@angular/forms';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 
-// Import the icons you need - this is the correct approach for Angular 18
-import { 
-  PlusOutline, 
-  UploadOutline, 
+import {
+  PlusOutline,
+  UploadOutline,
+  PlusCircleOutline,
+  FolderAddOutline,
   DownloadOutline,
-  FilterFill
+  FilterFill,
 } from '@ant-design/icons-angular/icons';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 
@@ -28,12 +33,13 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(FormsModule),
     provideAnimationsAsync(),
     provideHttpClient(),
-    // Register icons globally using the correct Angular 18 approach
     provideNzIcons([
       PlusOutline,
       UploadOutline,
+      PlusCircleOutline,
+      FolderAddOutline,
       DownloadOutline,
-      FilterFill
-    ])
-  ]
+      FilterFill,
+    ]),
+  ],
 };

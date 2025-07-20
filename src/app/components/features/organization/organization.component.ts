@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CreateDivision, DvisionViewModel } from '../../entities/divisions.entity';
+import {
+  CreateDivision,
+  DvisionViewModel,
+} from '../../entities/divisions.entity';
 import { DivisionService } from '../../services/division.service';
 import { CommonModule } from '@angular/common';
 import {
@@ -23,6 +26,13 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
+
+// Agregar la interfaz CreateSubdivision
+export interface CreateSubdivision {
+  nombre: string;
+  divisionId?: number;
+  embajadorNombre?: string;
+}
 
 interface ColumnFilter {
   text: string;
@@ -62,10 +72,16 @@ export class OrganizationComponent implements OnInit {
   divisionFilters: ColumnFilter[] = [];
   divisionSuperiorFilters: ColumnFilter[] = [];
 
-  // Modal properties
+  // Modal properties for division
   isCreateModalVisible = false;
   createDivisionForm: FormGroup;
   isSubmitting = false;
+
+  // Modal properties for subdivision
+  isCreateSubdivisionModalVisible = false;
+  createSubdivisionForm: FormGroup;
+  isSubmittingSubdivision = false;
+  selectedDivisionForSubdivision: DvisionViewModel | null = null;
 
   constructor(
     private divisionService: DivisionService,
@@ -78,6 +94,13 @@ export class OrganizationComponent implements OnInit {
       divisionSuperiorId: [null],
       embajadorNombre: [null],
       descripcion: [''],
+    });
+
+    // Inicializar el formulario de subdivisión
+    this.createSubdivisionForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      divisionId: [null],
+      embajadorNombre: [''],
     });
   }
 
@@ -169,6 +192,7 @@ export class OrganizationComponent implements OnInit {
     }
   }
 
+  // Métodos para el modal de división
   handleModal() {
     this.isCreateModalVisible = !this.isCreateModalVisible;
     this.createDivisionForm.reset();
@@ -208,6 +232,66 @@ export class OrganizationComponent implements OnInit {
     }
   }
 
+  // Métodos para el modal de subdivisión
+  handleSubdivisionModal(division?: DvisionViewModel) {
+    this.isCreateSubdivisionModalVisible =
+      !this.isCreateSubdivisionModalVisible;
+
+    if (division && this.isCreateSubdivisionModalVisible) {
+      this.selectedDivisionForSubdivision = division;
+      this.createSubdivisionForm.patchValue({
+        divisionId: division.id,
+      });
+    } else {
+      this.selectedDivisionForSubdivision = null;
+      this.createSubdivisionForm.reset();
+    }
+  }
+
+  async handleCreateSubdivisionOk() {
+    if (this.createSubdivisionForm.valid && this.selectedDivisionForSubdivision) {
+      try {
+        this.isSubmittingSubdivision = true;
+
+        const subdivisionData = {
+          nombre: this.createSubdivisionForm.value.nombre,
+          embajadorNombre: this.createSubdivisionForm.value.embajadorNombre
+        };
+        const divisionId = Number(this.selectedDivisionForSubdivision!.id);
+
+        await this.divisionService.createSubdivision(subdivisionData, divisionId);
+
+        this.divisions = await this.divisionService.getAllDivisions();
+        this.filteredDivisions = [...this.divisions];
+        this.setupFilters();
+
+        this.isCreateSubdivisionModalVisible = false;
+        this.createSubdivisionForm.reset();
+        this.selectedDivisionForSubdivision = null;
+        this.message.success('Subdivisión creada exitosamente');
+      } catch (error) {
+        console.error('Error creating subdivision:', error);
+        this.message.error('Error al crear la subdivisión');
+      } finally {
+        this.isSubmittingSubdivision = false;
+      }
+    } else {
+      Object.values(this.createSubdivisionForm.controls).forEach((control) => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+    }
+  }
+
+  // Método para manejar click en subdivisiones
+  onSubdivisionsClick(division: DvisionViewModel, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.handleSubdivisionModal(division);
+  }
+
   isFieldError(fieldName: string): boolean {
     const field = this.createDivisionForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
@@ -215,6 +299,25 @@ export class OrganizationComponent implements OnInit {
 
   getFieldError(fieldName: string): string {
     const field = this.createDivisionForm.get(fieldName);
+    if (field && field.errors) {
+      if (field.errors['required']) {
+        return `${fieldName} es requerido`;
+      }
+      if (field.errors['minlength']) {
+        return `${fieldName} debe tener al menos ${field.errors['minlength'].requiredLength} caracteres`;
+      }
+    }
+    return '';
+  }
+
+  // Métodos para validación de subdivisión
+  isSubdivisionFieldError(fieldName: string): boolean {
+    const field = this.createSubdivisionForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getSubdivisionFieldError(fieldName: string): string {
+    const field = this.createSubdivisionForm.get(fieldName);
     if (field && field.errors) {
       if (field.errors['required']) {
         return `${fieldName} es requerido`;

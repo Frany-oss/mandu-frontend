@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { CreateDivision, DvisionViewModel } from '../entities/divisions.entity';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { CreateSubdivision } from '../entities/subdivisions.entity';
 
 @Injectable({
   providedIn: 'root',
@@ -23,5 +24,9 @@ export class DivisionService {
     return await firstValueFrom(
       this.http.post<DvisionViewModel>(`${this.apiUrl}/divisions`, division)
     );
+  }
+
+  async createSubdivision(subdivision: CreateSubdivision, divisionId: number) {
+    return await firstValueFrom(this.http.post<void>(`${this.apiUrl}/subdivisions/division/${divisionId}`, subdivision))
   }
 }
